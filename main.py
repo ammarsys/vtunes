@@ -1,55 +1,33 @@
-from youtubesearchpython import VideosSearch
+"""VTunes, a user-friendly CLI YouTube MP3 downloader"""
+
 import subprocess
-import threading
+
+from utils import load_json, parse_input, parse_path, cls, parse_songs, parse_filename
+
+from terminalcolorpy import colored  # type: ignore
 
 subprocess.call("", shell=True)
-subprocess.call("cls", shell=True)
+cls()
 
-videos_to_download = []
-path_to_download = (
-    input(
-        "\u001b[36m[CONFIG]\033[0m Upisi PATH gdje ce pjesme biti instalirane, ENTER za default (G:/) >> "
-    )
-    or "G:/"
-)
+translations = load_json()
 
-text_default = lambda: print(
-    "\033[95m[INFO]\033[0m Upisi STOP za prestanak, za odabir pjesma njihov redni broj"
-)
-clear = lambda: subprocess.call("cls", shell=True) or None
+print("Please select your language,")
 
-text_default()
+for language in translations:
+    print("{0.number}. | {0.localName} ({0.code})".format(language))
 
-while True:
-    prompt = input("\u001b[34m[PROMPT]\033[0m Ukucaj ime pjesme >> ").strip()
+language = translations[parse_input(max_length=len(translations)) - 1]
+path = parse_path(language)
+cls()
+songs = parse_songs(language)
 
-    if prompt.lower() == "stop":
-        clear()
-        break
-
-    results = VideosSearch(prompt, limit=15).result()
-    
-    for c, i in enumerate(results["result"]):
-        print(f"\033[92m[{c+1}. | VIDEO]\033[0m {i['duration']} {i['title']}")
-
-    result_value = results["result"][
-        int(input("\u001b[34m[PROMPT]\033[0m Koja pjesma? >> ")) - 1
-    ]
-    videos_to_download.append((result_value["link"], result_value["title"]))
-
-    clear()
-    text_default()
-
-for c, (link, title) in enumerate(videos_to_download):
-    print(
-        f'\033[95m[INFO {c}/{len(videos_to_download)}]\033[0m Skidanje "{title}" ...',
-        end="\r",
-    )
+for c, (link, title) in enumerate(songs):
+    print(f'{c}/{len(songs)} {language.songDown} {colored(">>", "red")} "{title}"')
 
     subprocess.run(
-        f'yt-dlp --extract-audio --audio-format mp3 --quiet -o "{path_to_download}{title}.mp3" {link}'
+        f'yt-dlp --extract-audio --audio-format mp3 --quiet -o "{path}{parse_filename(title)}.mp3" {link}'
     )
 
-    print("\033[95m[INFO]\033[0m Skinuta pjesma!" + " " * 100, end="\r")
-    
+    cls()
+
 input()

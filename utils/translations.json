@@ -1,0 +1,34 @@
+{
+    "english": {
+        "translations": {
+            "pathInput": "Enter the PATH where the songs should be installed",
+            "badPath": "The PATH wasn't found or the program doesn't have sufficient permission, please try again",
+            "enterSong": "Enter a songs name to search",
+            "whichSong": "Choose a song",
+            "badInt": "The given value isn't an integer, please try again",
+            "outOfRange": "The given value is out of range, please try again",
+            "whichSongDefault": "Enter STOP to finish song selection, to choose a song enter their corresponding number, enter 0 to search again",
+            "noSongsFound": "No songs for the given query were found, please try again",
+            "songDown": "Downloading song"
+        },
+        "localName": "English",
+        "code": "EN",
+        "number": 1
+    },
+    "bosnian": {
+        "translations": {
+            "pathInput": "Unesi PATH gdje pjesme ce biti instalirane",
+            "badPath": "PATH ne postoji ili program nema potrebno dopustenje za taj PATH, probaj ponovo",
+            "enterSong": "Ukucaj ime pjesme",
+            "whichSong": "Izaberi pjesmu",
+            "badInt": "Dati unos nije broj, pokusaj ponovo",
+            "outOfRange": "Dati unos je van ranga, pokusaj ponovo",
+            "whichSongDefault": "Upisi STOP za prestanak, za odabir pjesma njihov redni broj, upisi 0 za ponovni odabir pjesmi",
+            "noSongsFound": "Nema pjesmi za dati unos, probaj ponovo",
+            "songDown": "Skidanje pjesme"
+        },
+        "localName": "Bosanski",
+        "code": "BA",
+        "number": 2
+    }
+}
