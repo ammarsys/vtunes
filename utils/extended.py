@@ -82,7 +82,9 @@ def parse_input(
         while not (chosen := input(inp_text or colored(">> ", "red"))).isdecimal():
             print(not_int or "The given value isn't an integer, please try again.")
 
-        if 1 <= int(chosen) <= max_length:
+        # Do not write as 'not chosen'.
+        chosen = int(chosen)
+        if 1 <= chosen <= max_length or chosen == 0:
             break
 
         print(out_range or "The given value is out of range, please try again.")
@@ -134,16 +136,17 @@ def parse_songs(language: Translation) -> list[tuple[str, str]]:
             time.sleep(2)
             continue
 
-        result_value = results["result"][
-            parse_input(
+        parsed_input = parse_input(
                 15,
                 language.whichSong + colored(" >> ", "red"),
                 language.badInt,
                 language.outOfRange,
-            )
-            - 1
-        ]
+            ) - 1
 
+        if parsed_input == -1:
+            continue
+
+        result_value = results["result"][parsed_input]
         to_download.append((result_value["link"], result_value["title"]))  # type: ignore
 
     return to_download
