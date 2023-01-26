@@ -13,7 +13,7 @@ from youtubesearchpython import VideosSearch  # type: ignore
 from terminalcolorpy import colored  # type: ignore
 
 
-PATH_REGEX = re.compile("[^a-zA-Z]")
+PATH_REGEX = re.compile("[a-zA-Z][a-zA-Z ]+")
 
 
 @dataclass
