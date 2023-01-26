@@ -7,6 +7,7 @@ import subprocess
 import re
 
 from dataclasses import dataclass
+from typing import Optional
 
 from youtubesearchpython import VideosSearch  # type: ignore
 from terminalcolorpy import colored  # type: ignore
@@ -64,7 +65,10 @@ def cls() -> None:
 
 
 def parse_input(
-    max_length: int, inp_text: str = None, not_int: str = None, out_range: str = None
+    max_length: int,
+    inp_text: Optional[str] = None,
+    not_int: Optional[str] = None,
+    out_range: Optional[str] = None,
 ) -> int:
     """
     Parse inputs
