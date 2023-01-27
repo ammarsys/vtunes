@@ -33,6 +33,7 @@ class Translation:
     whichSongDefault: str
     noSongsFound: str
     songDown: str
+    endText: str
 
 
 def load_json() -> list[Translation]:
@@ -97,7 +98,7 @@ def parse_path(language: Translation) -> str:
 
     while not os.access(
         path := input(language.pathInput + colored(" >> ", "red")), os.W_OK
-    ):
+    ) and os.access(path, os.R_OK):
         print(language.badPath)
 
     if path[-1] not in ("/", "\\"):

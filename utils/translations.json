@@ -9,7 +9,8 @@
             "outOfRange": "The given value is out of range, please try again",
             "whichSongDefault": "Enter STOP to finish song selection, to choose a song enter their corresponding number,",
             "noSongsFound": "No songs for the given query were found, please try again",
-            "songDown": "Downloading song"
+            "songDown": "Downloading song",
+            "endText": "All songs downloaded. If you liked the program give us a star on GitHub https://github.com/ammarsys/vtunes"
         },
         "localName": "English",
         "code": "EN",
@@ -25,7 +26,8 @@
             "outOfRange": "Dati unos je van ranga, pokusaj ponovo",
             "whichSongDefault": "Upisi STOP za prestanak, za odabir pjesma njihov redni broj",
             "noSongsFound": "Nema pjesmi za dati unos, probaj ponovo",
-            "songDown": "Skidanje pjesme"
+            "songDown": "Skidanje pjesme",
+            "endText": "Sve pjesme su skinute. Ako ti se svidja program daj nam zvjezdicu na GitHub-u https://github.com/ammarsys/vtunes"
         },
         "localName": "Bosanski",
         "code": "BA",

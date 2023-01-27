@@ -28,6 +28,4 @@ for c, (link, title) in enumerate(songs):
         f'yt-dlp --extract-audio --audio-format mp3 --quiet -o "{path}{parse_filename(title)}.mp3" {link}'
     )
 
-    cls()
-
-input()
+input(language.endText)
