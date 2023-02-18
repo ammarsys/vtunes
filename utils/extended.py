@@ -9,11 +9,9 @@ import re
 from dataclasses import dataclass
 from typing import Optional
 
-from youtubesearchpython import VideosSearch  # type: ignore
 from terminalcolorpy import colored  # type: ignore
 
-
-PATH_REGEX = re.compile("[a-zA-Z][a-zA-Z ]+")
+PATH_REGEX = re.compile("[^a-zA-Z] ")
 
 
 @dataclass
@@ -37,7 +35,7 @@ class Translation:
 
 
 def load_json() -> list[Translation]:
-    """Load the JSON file and return a list containing Translation dataclasses"""
+    """Load the JSON file and return a list containing Translation dataclass instances"""
 
     with open("utils/translations.json") as translations:
         data = json.load(translations)
@@ -60,7 +58,7 @@ def load_json() -> list[Translation]:
 
 
 def cls() -> None:
-    """Clear the command line"""
+    """Clear the command line by making a system call for the Windows cls command"""
 
     subprocess.call("cls", shell=True)
 
@@ -68,33 +66,48 @@ def cls() -> None:
 def parse_input(
     max_length: int,
     inp_text: Optional[str] = None,
-    not_int: Optional[str] = None,
-    out_range: Optional[str] = None,
+    not_int: Optional[str] = "The given value isn't an integer, please try again.",
+    out_range: Optional[str] = "The given value is out of range, please try again.",
 ) -> int:
-    """
-    Parse inputs
+    """Parse inputs
 
-    Validate inputs for the following conditions,
-        - whether given input is an integer
-        - whether given input is in / out of range
+    This is essentially a 'builtins.input' function with fail-safe checks so that the program doesn't crash if the user
+    say, inputs a non-decimal character when a decimal character is expected.
+
+    Args:
+        max_length: used for validation of stdin to see if it's within the range of 1 and said arg
+
+        inp_text: input text for the stdin validation, defaults to >>
+        not_int: text for when stdin input is not an integer
+        out_range: text for when stdin input is out of range
+
+    The inp_text, not_int and out_range arguments exist to simplify the usage of this function. They're here to allow
+    for different languages to be used in place of default English responses.
+
+    Returns:
+        an integer as result from stdin input function
     """
 
     while True:
         while not (chosen := input(inp_text or colored(">> ", "red"))).isdecimal():
-            print(not_int or "The given value isn't an integer, please try again.")
+            print(not_int)
 
         # Do not write as 'not chosen'.
         chosen = int(chosen)
         if 1 <= chosen <= max_length or chosen == 0:
             break
 
-        print(out_range or "The given value is out of range, please try again.")
+        print(out_range)
 
     return int(chosen)
 
 
 def parse_path(language: Translation) -> str:
-    """Parse path and check its validity"""
+    """Parse path and check its validity
+
+    This function uses 'os.access' to check the path for read and write permissions as well as ensure it's a directory
+    by appending '/' or '\\' to the end of the path granted, if not present.
+    """
 
     while not os.access(
         path := input(language.pathInput + colored(" >> ", "red")), os.W_OK
@@ -104,16 +117,37 @@ def parse_path(language: Translation) -> str:
     if path[-1] not in ("/", "\\"):
         path += "\\"
 
-    print(path)
     return path
 
 
-def parse_songs(language: Translation) -> list[tuple[str, str]]:
-    """
-    Parse songs,
+def search_songs(query: str) -> list[list[str]]:
+    """Search for songs using yt-dlp and chunk them into a 2d list
 
-    Not much to say here, most of the stuff is cosmetic. Basically, handle & validate user input until they choose to
-    stop. With the given input(s), search for songs and return them.
+    Since yt-dlp returns results in format TITLE, DURATION, URL we need to chunk the results into a 2d list (a list
+    containing more lists). The lists inside the said 2d list are as expected in format of TITLE, DURATION, URL.
+    """
+
+    out = (
+        subprocess.check_output(
+            f'yt-dlp "ytsearch15:{query}" -O title -O duration_string -O url --flat-playlist',
+            encoding="cp1252"
+        )
+        .split("\n")
+    )
+    chunked = []
+
+    for i in range(3, len(out) + 1, 3):
+        chunked.append((out[i - 3: i]))
+
+    return chunked
+
+
+def parse_songs(language: Translation) -> list[tuple[str, str]]:
+    """Parse songs
+
+    Prompt the user for songs until they say "stop". This noun is not translated to native languages because it is
+    commonly borrowed from English and used colloquinally. Searching for song is done using the 'extended.search_songs'
+    function and then the song(s) are parsed using the 'extended.parse_input' function.
     """
 
     to_download = []
@@ -127,33 +161,37 @@ def parse_songs(language: Translation) -> list[tuple[str, str]]:
         if query.lower() == "stop":
             break
 
-        results = VideosSearch(query, limit=15).result()
+        results = search_songs(query)
 
-        for c, i in enumerate(results["result"]):
-            print(f"{colored(f'{c + 1}', 'green')}. | {i['duration']} {i['title']}")
+        for c, result in enumerate(results):
+            print(f"{colored(f'{c + 1}', 'green')}. | {result[1]} {result[0]}")
 
-        if not len(results["result"]):
+        if not results:  # empty list case
             print(language.noSongsFound)
             time.sleep(2)
             continue
 
-        parsed_input = parse_input(
-                15,
+        parsed_input = (
+            parse_input(
+                len(results),
                 language.whichSong + colored(" >> ", "red"),
                 language.badInt,
                 language.outOfRange,
-            ) - 1
+            )
+            - 1  # Remove 1 because indexing in Python starts from 0
+        )
 
         if parsed_input == -1:
             continue
 
-        result_value = results["result"][parsed_input]
-        to_download.append((result_value["link"], result_value["title"]))  # type: ignore
+        to_download.append(
+            (results[parsed_input][2], results[parsed_input][0])
+        )  # first is url second is title
 
     return to_download
 
 
 def parse_filename(fl: str) -> str:
-    """Remove any characters that may not be valid in a filename (allow only alphabetical chars)."""
+    """Remove any characters with regex that may not be valid in a filename (i.e. allow only alphabetical chars)"""
 
     return PATH_REGEX.sub("", fl)
