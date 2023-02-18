@@ -5,6 +5,8 @@ __pycache__/
 
 #pycharm shit
 .idea
+.idea/
+.idea/vtunes.iml
 
 # C extensions
 *.so
