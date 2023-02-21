@@ -23,7 +23,7 @@ This is a minimalistic CLI tool to download songs from YouTube. I built this to 
 ```
 git clone https://github.com/novusys/vtunes
 cd vtunes
-py -m pip install requirements.txt -r
+py -m pip install -r requirements.txt
 py main.py
 ```
 
@@ -31,5 +31,5 @@ and voilla! That's it, follow the messages in terminal for help with usage.
 
 # Contributing
 
-Contributions are welcomed and encouraged. Feel free to add your own language in `translations.json`.
+Contributions are welcomed and encouraged. Feel free to add your own language in `languages.json`.
 For code contributions, please ensure it's properly typed and uses black formatting.
