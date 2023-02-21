@@ -11,12 +11,12 @@ from typing import Optional
 
 from terminalcolorpy import colored  # type: ignore
 
-PATH_REGEX = re.compile("[^a-zA-Z] ")
+PATH_REGEX = re.compile("[^A-Za-z0-9 ]+")
 
 
 @dataclass
-class Translation:
-    """Dataclass for all values in translation json. Structure should remain like this because of linter support."""
+class Language:
+    """Dataclass for all values in 'languages.json'. Structure should remain like this because of linter support."""
 
     localName: str
     code: str
@@ -34,10 +34,10 @@ class Translation:
     endText: str
 
 
-def load_json() -> list[Translation]:
+def load_json() -> list[Language]:
     """Load the JSON file and return a list containing Translation dataclass instances"""
 
-    with open("utils/translations.json") as translations:
+    with open("languages.json") as translations:
         data = json.load(translations)
 
     to_return = []
@@ -46,7 +46,7 @@ def load_json() -> list[Translation]:
         indexed = data[language]
 
         to_return.append(
-            Translation(
+            Language(
                 indexed["localName"],
                 indexed["code"],
                 indexed["number"],
@@ -89,12 +89,13 @@ def parse_input(
     """
 
     while True:
-        while not (chosen := input(inp_text or colored(">> ", "red"))).isdecimal():
+        while not (chosen := input(inp_text or colored(">> ", "red"))).isdecimal():  # type: ignore
             print(not_int)
 
         # Do not write as 'not chosen'.
-        chosen = int(chosen)
-        if 1 <= chosen <= max_length or chosen == 0:
+        # I have no idea why mypy fails here
+        chosen = int(chosen)  # type: ignore
+        if 1 <= chosen <= max_length or chosen == 0:  # type: ignore
             break
 
         print(out_range)
@@ -102,7 +103,7 @@ def parse_input(
     return int(chosen)
 
 
-def parse_path(language: Translation) -> str:
+def parse_path(language: Language) -> str:
     """Parse path and check its validity
 
     This function uses 'os.access' to check the path for read and write permissions as well as ensure it's a directory
@@ -127,22 +128,19 @@ def search_songs(query: str) -> list[list[str]]:
     containing more lists). The lists inside the said 2d list are as expected in format of TITLE, DURATION, URL.
     """
 
-    out = (
-        subprocess.check_output(
-            f'yt-dlp "ytsearch15:{query}" -O title -O duration_string -O url --flat-playlist',
-            encoding="cp1252"
-        )
-        .split("\n")
-    )
+    out = subprocess.check_output(
+        f'yt-dlp "ytsearch15:{query}" -O title -O duration_string -O url --flat-playlist',
+        encoding="cp1252",
+    ).split("\n")
     chunked = []
 
     for i in range(3, len(out) + 1, 3):
-        chunked.append((out[i - 3: i]))
+        chunked.append((out[i - 3 : i]))
 
     return chunked
 
 
-def parse_songs(language: Translation) -> list[tuple[str, str]]:
+def parse_songs(language: Language) -> list[tuple[str, str]]:
     """Parse songs
 
     Prompt the user for songs until they say "stop". This noun is not translated to native languages because it is
