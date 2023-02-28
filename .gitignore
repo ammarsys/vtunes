@@ -3,6 +3,10 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+#ignore ffmpeg and ytdlp
+utils/ffmpeg
+utils/yt-dlp
+
 #pycharm shit
 .idea
 .idea/
