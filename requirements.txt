@@ -1,3 +1,2 @@
 terminalcolorpy
-youtube_search_python
-yt-dlp
+youtube-search-python
