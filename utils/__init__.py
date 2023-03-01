@@ -6,5 +6,4 @@ from .extended import (
     cls,
     parse_songs,
     parse_filename,
-    search_songs,
 )

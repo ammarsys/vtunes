@@ -9,6 +9,7 @@ import re
 from dataclasses import dataclass
 from typing import Optional
 
+from youtubesearchpython import VideosSearch  # type: ignore
 from terminalcolorpy import colored  # type: ignore
 
 PATH_REGEX = re.compile("[^A-Za-z0-9 ]+")
@@ -70,20 +71,15 @@ def parse_input(
     out_range: Optional[str] = "The given value is out of range, please try again.",
 ) -> int:
     """Parse inputs
-
     This is essentially a 'builtins.input' function with fail-safe checks so that the program doesn't crash if the user
     say, inputs a non-decimal character when a decimal character is expected.
-
     Args:
         max_length: used for validation of stdin to see if it's within the range of 1 and said arg
-
         inp_text: input text for the stdin validation, defaults to >>
         not_int: text for when stdin input is not an integer
         out_range: text for when stdin input is out of range
-
     The inp_text, not_int and out_range arguments exist to simplify the usage of this function. They're here to allow
     for different languages to be used in place of default English responses.
-
     Returns:
         an integer as result from stdin input function
     """
@@ -105,7 +101,6 @@ def parse_input(
 
 def parse_path(language: Language) -> str:
     """Parse path and check its validity
-
     This function uses 'os.access' to check the path for read and write permissions as well as ensure it's a directory
     by appending '/' or '\\' to the end of the path granted, if not present.
     """
@@ -121,28 +116,8 @@ def parse_path(language: Language) -> str:
     return path
 
 
-def search_songs(query: str) -> list[list[str]]:
-    """Search for songs using yt-dlp and chunk them into a 2d list
-
-    Since yt-dlp returns results in format TITLE, DURATION, URL we need to chunk the results into a 2d list (a list
-    containing more lists). The lists inside the said 2d list are as expected in format of TITLE, DURATION, URL.
-    """
-
-    out = subprocess.check_output(
-        f'yt-dlp "ytsearch15:{query}" -O title -O duration_string -O url --flat-playlist',
-        encoding="cp1252",
-    ).split("\n")
-    chunked = []
-
-    for i in range(3, len(out) + 1, 3):
-        chunked.append((out[i - 3 : i]))
-
-    return chunked
-
-
 def parse_songs(language: Language) -> list[tuple[str, str]]:
     """Parse songs
-
     Prompt the user for songs until they say "stop". This noun is not translated to native languages because it is
     commonly borrowed from English and used colloquinally. Searching for song is done using the 'extended.search_songs'
     function and then the song(s) are parsed using the 'extended.parse_input' function.
@@ -159,32 +134,30 @@ def parse_songs(language: Language) -> list[tuple[str, str]]:
         if query.lower() == "stop":
             break
 
-        results = search_songs(query)
+        results = VideosSearch(query, limit=20).result()
 
-        for c, result in enumerate(results):
-            print(f"{colored(f'{c + 1}', 'green')}. | {result[1]} {result[0]}")
+        for c, i in enumerate(results["result"]):
+            print(f"{colored(f'{c + 1}', 'green')}. | {i['duration']} {i['title']}")
 
-        if not results:  # empty list case
+        if not len(results["result"]):  # empty list case
             print(language.noSongsFound)
             time.sleep(2)
             continue
 
-        parsed_input = (
-            parse_input(
-                len(results),
+        parsed_input = results["result"][
+            choice := parse_input(
+                len(results["result"]),
                 language.whichSong + colored(" >> ", "red"),
                 language.badInt,
                 language.outOfRange,
             )
-            - 1  # Remove 1 because indexing in Python starts from 0
-        )
+            - 1
+        ]
 
-        if parsed_input == -1:
+        if choice == -1:  # Means user chose 0 to search again
             continue
 
-        to_download.append(
-            (results[parsed_input][2], results[parsed_input][0])
-        )  # first is url second is title
+        to_download.append((parsed_input["link"], parsed_input["title"]))  # type: ignore
 
     return to_download
 
