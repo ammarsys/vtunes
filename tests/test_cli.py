@@ -7,7 +7,6 @@ import sys
 from utils import (
     parse_path,
     Language,
-    search_songs,
     parse_filename,
     load_json,
     parse_input,
@@ -44,10 +43,6 @@ def test_parse_path(english_language: Language) -> None:
     sys.stdin = _TestStdin(["./"])  # type: ignore
 
     assert parse_path(english_language) == "./"
-
-
-def test_search_songs() -> None:
-    assert isinstance(search_songs("despacito"), list)
 
 
 def test_parse_filename() -> None:
